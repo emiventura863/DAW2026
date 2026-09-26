@@ -25,7 +25,7 @@ class EpisodeController extends ApiController{
     }
     
     
-    public function bajarEpisodes(){
+    public function bajarEpisodes(){~
         
         $pages = $this->info($this->getCUrl())["pages"];
         
