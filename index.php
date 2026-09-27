@@ -1,9 +1,11 @@
 <?php
 
-require "ApiController.php";
-require "CharacterController.php";
-require "LocationController.php";
-require "EpisodeController.php";
+require "controllers/ApiController.php";
+require "controllers/CharacterController.php";
+require "controllers/LocationController.php";
+require "controllers/EpisodeController.php";
+require "repositories/BaseRepository.php";
+require "repositories/CharacterRepository.php";
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -23,6 +25,11 @@ $pC = new EpisodeController();
         Vamos a traer los personajes <br>
         
             <?php
+            
+            $conexion = new CharacterRepository();
+            
+            $conexion->prueba();
+            
             
             $info = $cC->info($cC->getCUrl());
             
