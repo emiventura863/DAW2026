@@ -1,15 +1,17 @@
 <?php
 
-require "controllers/ApiController.php";
-require "controllers/CharacterController.php";
-require "controllers/LocationController.php";
-require "controllers/EpisodeController.php";
-require "repositories/BaseRepository.php";
-require "repositories/CharacterRepository.php";
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+require_once "controllers/ApiController.php";
+require_once "controllers/CharacterController.php";
+require_once "controllers/LocationController.php";
+require_once "controllers/EpisodeController.php";
+require_once "repositories/BaseRepository.php";
+require_once "repositories/CharacterRepository.php";
+
+
 
 $cC = new CharacterController();
 $lC = new LocationController();
@@ -26,14 +28,11 @@ $pC = new EpisodeController();
         
             <?php
             
-            $conexion = new CharacterRepository();
-            
-            $conexion->prueba();
-            
+            $cR = new CharacterRepository();
             
             $info = $cC->info($cC->getCUrl());
             
-            $cC->bajarCharacters();
+            $cC->bajarCharacters($cR);
             
             ?>
         
@@ -41,7 +40,7 @@ $pC = new EpisodeController();
             
             <?php
             
-            $lC->bajarLocations();
+            //$lC->bajarLocations();
             
             ?>
             
@@ -49,7 +48,7 @@ $pC = new EpisodeController();
         
         <?php
         
-        $pC->bajarEpisodes();
+        //$pC->bajarEpisodes();
         
         ?>
         

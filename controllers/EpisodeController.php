@@ -33,13 +33,13 @@ class EpisodeController extends ApiController{
             
             $url = "https://rickandmortyapi.com/api/episode/?page=" . $i;
             
-            $newCurl = curl_init($url);
+            $this->setCUrl(curl_init($url));
             
-            curl_setopt($newCurl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($this->cUrl, CURLOPT_RETURNTRANSFER, true);
             
-            $respuesta = curl_exec($newCurl);
+            $respuesta = curl_exec($this->cUrl);
             
-            $httpCode = curl_getinfo($newCurl,CURLINFO_HTTP_CODE);
+            $httpCode = curl_getinfo($this->cUrl,CURLINFO_HTTP_CODE);
             
             if($httpCode == 200){
                 
@@ -52,6 +52,7 @@ class EpisodeController extends ApiController{
                 } 
                 
             }
+            curl_close($this->cUrl);
             
         }
             
