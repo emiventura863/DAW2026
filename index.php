@@ -17,6 +17,8 @@ $cC = new CharacterController();
 $lC = new LocationController();
 $pC = new EpisodeController();
 
+$cR = new CharacterRepository();
+
 ?>
 <html>
     <head>
@@ -28,11 +30,12 @@ $pC = new EpisodeController();
         
             <?php
             
-            $cR = new CharacterRepository();
-            
             $info = $cC->info($cC->getCUrl());
             
             $cC->bajarCharacters($cR);
+            
+            $cC->traerCharacter($cR, 213);
+            
             
             ?>
         

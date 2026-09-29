@@ -12,7 +12,7 @@ class Character {
     private $location_id;
     private $episode;
 
-    public function __construct($id, $name, $status, $species, $type, $gender, $origin, $location_id, $episode) {
+    public function __construct($id=null, $name=null, $status=null, $species=null, $type=null, $gender=null, $origin=null, $location_id=null, $episode=null) {
         $this->id = $id;
         $this->name = $name;
         $this->status = $status;
@@ -95,4 +95,18 @@ class Character {
     public function setEpisode($episode): void {
         $this->episode = $episode;
     }
+    
+    public function __toString(): string {
+        return "Character[id=" . $this->id
+                . ", name=" . $this->name
+                . ", status=" . $this->status
+                . ", species=" . $this->species
+                . ", type=" . $this->type
+                . ", gender=" . $this->gender
+                . ", origin=" . $this->origin
+                . ", location_id=" . $this->location_id
+                . ", episode=" . $this->episode
+                . "]";
+    }
+
 }
