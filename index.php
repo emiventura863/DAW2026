@@ -10,8 +10,7 @@ require_once "controllers/LocationController.php";
 require_once "controllers/EpisodeController.php";
 require_once "repositories/BaseRepository.php";
 require_once "repositories/CharacterRepository.php";
-
-
+require_once "repositories/LocationRepository.php";
 
 $cC = new CharacterController();
 $lC = new LocationController();
@@ -27,29 +26,22 @@ $pC = new EpisodeController();
         Vamos a traer los personajes <br>
         
             <?php
-            
             $cR = new CharacterRepository();
-            
-            $info = $cC->info($cC->getCUrl());
-            
-            $cC->bajarCharacters($cR);
-            
+            // Comentado temporalmente porque ya se importaron los 826:
+            // $cC->bajarCharacters($cR);
             ?>
         
         <br>Vamos a traer las localizaciones <br>
             
             <?php
-            
-            //$lC->bajarLocations();
-            
+            $lR = new LocationRepository();
+            $lC->bajarLocations($lR);
             ?>
             
         <br>Vamos a traer los episodios <br>
         
         <?php
-        
-        //$pC->bajarEpisodes();
-        
+        // $pC->bajarEpisodes();
         ?>
         
     </body>

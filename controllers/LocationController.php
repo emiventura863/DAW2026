@@ -1,13 +1,13 @@
 <?php
 
+require_once "repositories/LocationRepository.php";
+
 class LocationController extends ApiController {
 
     private $cUrl;
 
     public function __construct() {
-
         $this->cUrl = curl_init("https://rickandmortyapi.com/api/location");
-
         curl_setopt($this->cUrl, CURLOPT_RETURNTRANSFER, true);
     }
 
@@ -24,32 +24,26 @@ class LocationController extends ApiController {
         return parent::info($cUrl);
     }
 
-    public function bajarLocations() {
-
+    public function bajarLocations(LocationRepository $locationRepository) {
         $pages = $this->info($this->getCUrl())["pages"];
 
         for ($i = 1; $i <= $pages; $i++) {
-
             $url = "https://rickandmortyapi.com/api/location/?page=" . $i;
 
-            $this->setCUrl(curl_init($url));
-
-            curl_setopt($this->cUrl, CURLOPT_RETURNTRANSFER, true);
-
-            $respuesta = curl_exec($this->cUrl);
-
-            $httpCode = curl_getinfo($this->cUrl, CURLINFO_HTTP_CODE);
+            $newCurl = curl_init($url);
+            curl_setopt($newCurl, CURLOPT_RETURNTRANSFER, true);
+            $respuesta = curl_exec($newCurl);
+            $httpCode = curl_getinfo($newCurl, CURLINFO_HTTP_CODE);
 
             if ($httpCode == 200) {
-
                 $locations = json_decode($respuesta, true);
 
                 foreach ($locations["results"] as $location) {
-
-                    echo "<br>" . "Pagina: " . $i . " ID: " . $location["id"] . " | Nombre: " . $location["name"] . " Tipo: " . $location["type"] . " Dimension: " . $location["dimension"] . "<br>";
+                    $locationRepository->create($location);
+                    echo "<br>Página: " . $i . " - ID: " . $location["id"] . " | " . $location["name"] . " - Guardado exitosamente";
                 }
             }
-            curl_close($this->cUrl);
+            curl_close($newCurl);
         }
     }
 }
