@@ -16,6 +16,8 @@ $cC = new CharacterController();
 $lC = new LocationController();
 $pC = new EpisodeController();
 
+$cR = new CharacterRepository();
+
 ?>
 <html>
     <head>
@@ -26,9 +28,14 @@ $pC = new EpisodeController();
         Vamos a traer los personajes <br>
         
             <?php
-            $cR = new CharacterRepository();
-            // Comentado temporalmente porque ya se importaron los 826:
-            // $cC->bajarCharacters($cR);
+            
+            $info = $cC->info($cC->getCUrl());
+            
+            $cC->bajarCharacters($cR);
+            
+            $cC->traerCharacter($cR, 213);
+            
+            
             ?>
         
         <br>Vamos a traer las localizaciones <br>

@@ -40,14 +40,25 @@ class CharacterRepository extends BaseRepository {
         $location_id = is_object($character) ? $character->getLocation_id() : null;
 
         $stmt->execute([
-            ":id"          => $id,
-            ":name"        => $name,
-            ":status"      => $status,
-            ":species"     => $species,
-            ":type"        => $type,
-            ":gender"      => $gender,
-            ":origin"      => $origin,
-            ":location_id" => $location_id
+            ":id" => $character->getId(),
+            ":name" => $character->getName(),
+            ":status" => $character->getStatus(),
+            ":species" => $character->getSpecies(),
+            ":type" => $character->getType(),
+            ":gender" => $character->getGender(),
+            ":origin" => $character->getOrigin(),
+            ":location_id" => $character->getLocation_id()
         ]);
+    }
+
+    function find(int $id) {
+
+        $stmt = $this->pdo->prepare("SELECT * FROM characters WHERE id=:id");
+
+        $stmt->execute([
+            ":id" => $id
+        ]);
+
+        return $stmt->fetch();
     }
 }
