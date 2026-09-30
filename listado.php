@@ -41,7 +41,7 @@ $total = $cR->countAll($search, $status);
 
 // CANTIDAD DE PÁGINAS
 
-$totalPaginas = (int) ceil($total / $porPagina);
+ $totalPaginas = (int) ceil($total / $porPagina);
 
 
 if ($totalPaginas > 0 && $page > $totalPaginas) {
