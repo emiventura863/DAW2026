@@ -1,43 +1,23 @@
 <?php
 
-// Patron Singleton
-
 abstract class BaseRepository {
-   
-    // Instancia unica de PDO para la app
-    // PDO?: Puede ser pdo o null
-    
+
     private static ?PDO $pdoInstance = null;
-    protected PDO $pdo;
-    
+    protected ?PDO $pdo = null; // Cambiado a ?PDO = null para evitar el bloqueo fatal
+
     public function __construct() {
-        
-        // Si tengo conexion creada la utilizo
-        // si no , la inicializo por unica vez
-        
-        if(self::$pdoInstance==null){
-            
-            $dsn = "mysql:host=localhost;dbname=rick_and_morty_db";
+        if (self::$pdoInstance === null) {
+            $dsn = "mysql:host=localhost;dbname=rick_and_morty_db;charset=utf8mb4";
             $usuario = "root";
             $pass = "";
-            
-            try{
-                
-                self::$pdoInstance = new PDO($dsn,$usuario,$pass);
-                self::$pdoInstance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                
-            } catch (PDOException $ex) {
-                
-                die($ex->getMessage()); 
-                
-            }
-            
-            $this->pdo = self::$pdoInstance;
-            
-        }
-        
-        
-    }
 
-    
+            try {
+                self::$pdoInstance = new PDO($dsn, $usuario, $pass);
+                self::$pdoInstance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            } catch (PDOException $ex) {
+                die("Error de conexión a la base de datos: " . $ex->getMessage());
+            }
+        }
+        $this->pdo = self::$pdoInstance;
+    }
 }
