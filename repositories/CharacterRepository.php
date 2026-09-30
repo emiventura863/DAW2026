@@ -2,17 +2,21 @@
 
 require_once "BaseRepository.php";
 
-class CharacterRepository extends BaseRepository {
+class CharacterRepository extends BaseRepository
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
 
-    public function prueba() {
+    public function prueba()
+    {
         echo $this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS);
     }
 
-    public function create($character) {
+    public function create($character)
+    {
         if ($this->pdo === null) {
             parent::__construct();
         }
@@ -51,7 +55,8 @@ class CharacterRepository extends BaseRepository {
         ]);
     }
 
-    function find(int $id) {
+    function find(int $id)
+    {
 
         $stmt = $this->pdo->prepare("SELECT * FROM characters WHERE id=:id");
 
@@ -60,5 +65,67 @@ class CharacterRepository extends BaseRepository {
         ]);
 
         return $stmt->fetch();
+    }
+
+    // Arma el pedazo "WHERE ..." + los parametros, compartido entre findAll y countAll
+    private function armarFiltro(?string $search, ?string $status): array
+    {
+
+        $condiciones = [];
+        $parametros = [];
+
+        if ($search !== null && $search !== "") {
+            $condiciones[] = "name LIKE :search";
+            $parametros[":search"] = "%" . $search . "%";
+        }
+
+        if ($status !== null && $status !== "") {
+            $condiciones[] = "status = :status";
+            $parametros[":status"] = $status;
+        }
+
+        $whereSql = count($condiciones) > 0
+            ? "WHERE " . implode(" AND ", $condiciones)
+            : "";
+
+        return [$whereSql, $parametros];
+    }
+
+    public function findAll(int $page = 1, int $perPage = 20, ?string $search = null, ?string $status = null): array
+    {
+
+        [$whereSql, $parametros] = $this->armarFiltro($search, $status);
+
+        $offset = ($page - 1) * $perPage;
+
+        $sql = "SELECT * FROM characters $whereSql ORDER BY id LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        // Los parametros de texto se atan normal
+        foreach ($parametros as $clave => $valor) {
+            $stmt->bindValue($clave, $valor);
+        }
+
+        // limit y offset necesitan tipo INT explicito
+        $stmt->bindValue(":limit", $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public function countAll(?string $search = null, ?string $status = null): int
+    {
+
+        [$whereSql, $parametros] = $this->armarFiltro($search, $status);
+
+        $sql = "SELECT COUNT(*) FROM characters $whereSql";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($parametros);
+
+        return (int) $stmt->fetchColumn();
     }
 }
