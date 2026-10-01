@@ -62,6 +62,7 @@ class CharacterController extends ApiController {
                     $origin = null;
                     $location_id = null;
                     $episode = null;
+                    $image = $character["image"] ?? null; // <-- Asegurado al final
                     
                     // Validacion, existe en la bd?
                     
@@ -73,7 +74,8 @@ class CharacterController extends ApiController {
 
                         try {
 
-                            $cs = new Character($id, $name, $status, $species, $type, $gender, $origin, $location_id, $episode);
+                            // Respetando el orden del constructor: id, name, status, species, type, gender, origin, location_id, episode, image
+                            $cs = new Character($id, $name, $status, $species, $type, $gender, $origin, $location_id, $episode, $image);
                             $cR->create($cs);
 
                             echo "Guardado exitosamente";
@@ -103,12 +105,12 @@ class CharacterController extends ApiController {
             $char->setName($arrayChar["name"]);
             $char->setStatus($arrayChar["status"]);
             $char->setSpecies($arrayChar["species"]);
-            $char->setStatus($arrayChar["status"]);
             $char->setType($arrayChar["type"]);
             $char->setGender($arrayChar["gender"]);
             $char->setOrigin($arrayChar["origin"]);
             $char->setLocation_id($arrayChar["location_id"]);
             $char->setEpisode($arrayChar["episode"]);
+            $char->setImage($arrayChar["image"]); // <-- ¡Agregado para que no falte la imagen!
 
             echo $char;
             

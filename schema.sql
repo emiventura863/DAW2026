@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS characters (
     species VARCHAR(100) NULL,
     type VARCHAR(100) NULL,
     gender VARCHAR(50) NULL,
+    image VARCHAR(255) NULL,
     origin VARCHAR(255) NULL,
     location_id INT NULL,
     PRIMARY KEY (id),

@@ -11,8 +11,9 @@ class Character {
     private $origin;
     private $location_id;
     private $episode;
+    private $image;
 
-    public function __construct($id=null, $name=null, $status=null, $species=null, $type=null, $gender=null, $origin=null, $location_id=null, $episode=null) {
+    public function __construct($id=null, $name=null, $status=null, $species=null, $type=null, $gender=null, $origin=null, $location_id=null, $episode=null, $image=null) {
         $this->id = $id;
         $this->name = $name;
         $this->status = $status;
@@ -22,6 +23,7 @@ class Character {
         $this->origin = $origin;
         $this->location_id = $location_id;
         $this->episode = $episode;
+        $this->image = $image;
     }
 
     public function getId() {
@@ -60,6 +62,10 @@ class Character {
         return $this->episode;
     }
 
+    public function getImage() {
+        return $this->image;
+    }
+
     public function setId($id): void {
         $this->id = $id;
     }
@@ -94,6 +100,10 @@ class Character {
 
     public function setEpisode($episode): void {
         $this->episode = $episode;
+    }
+
+    public function setImage($image): void {
+        $this->image = $image;
     }
     
     public function __toString(): string {
