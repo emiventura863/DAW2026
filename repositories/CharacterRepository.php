@@ -216,4 +216,25 @@ class CharacterRepository extends BaseRepository
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // Guarda la relación entre un personaje y un episodio.
+    // Si la relación ya existe, INSERT IGNORE evita duplicarla.
+    public function addEpisode(int $characterId, int $episodeId): void
+    {
+        $sql = "INSERT IGNORE INTO character_episode (
+                character_id,
+                episode_id
+            )
+            VALUES (
+                :character_id,
+                :episode_id
+            )";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([
+            ':character_id' => $characterId,
+            ':episode_id' => $episodeId
+        ]);
+    }
 }

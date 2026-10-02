@@ -4,35 +4,43 @@ require_once "repositories/BaseRepository.php";
 require_once "repositories/CharacterRepository.php";
 require_once "classes/Character.php";
 
-class CharacterController extends ApiController {
+class CharacterController extends ApiController
+{
 
     private $cUrl;
 
-    public function __construct() {
+    public function __construct()
+    {
 
         $this->cUrl = curl_init("https://rickandmortyapi.com/api/character/");
 
         curl_setopt($this->cUrl, CURLOPT_RETURNTRANSFER, true);
     }
 
-    public function getCUrl() {
+    public function getCUrl()
+    {
 
         return $this->cUrl;
     }
 
-    public function setCUrl($cUrl): void {
+    public function setCUrl($cUrl): void
+    {
         $this->cUrl = $cUrl;
     }
 
     #[\Override]
-    public function info(\CurlHandle $cUrl) {
+    public function info(\CurlHandle $cUrl)
+    {
         return parent::info($cUrl);
     }
 
-    public function bajarCharacters(CharacterRepository $cR) {
-
+    // Descarga todos los personajes de la API y los guarda o actualiza en la base de datos
+    public function bajarCharacters(CharacterRepository $cR)
+    {
+        // Obtenemos la cantidad total de páginas de personajes
         $pages = $this->info($this->getCUrl())["pages"];
 
+        // Recorremos todas las páginas de la API
         for ($i = 1; $i <= $pages; $i++) {
 
             $url = "https://rickandmortyapi.com/api/character/?page=" . $i;
@@ -41,66 +49,112 @@ class CharacterController extends ApiController {
 
             curl_setopt($this->cUrl, CURLOPT_RETURNTRANSFER, true);
 
+            // Ejecutamos la consulta a la API
             $respuesta = curl_exec($this->cUrl);
 
-            $httpCode = curl_getinfo($this->cUrl, CURLINFO_HTTP_CODE);
+            $httpCode = curl_getinfo(
+                $this->cUrl,
+                CURLINFO_HTTP_CODE
+            );
 
+            // Procesamos la respuesta solamente si fue correcta
             if ($httpCode == 200) {
 
                 $characters = json_decode($respuesta, true);
 
+                // Recorremos todos los personajes de la página actual
                 foreach ($characters["results"] as $character) {
 
-                    echo "<br> " . "Pagina: " . $i . " - " . "ID: " . $character["id"] . " | " . $character["name"] . " - Especie: " . $character["species"] . "- Genero: " . $character["gender"] . "<br>";
+                    echo "<br>
+                    Pagina: " . $i .
+                        " - ID: " . $character["id"] .
+                        " | " . $character["name"] .
+                        " - Especie: " . $character["species"] .
+                        " - Genero: " . $character["gender"] .
+                        "<br>";
 
+                    // Datos principales del personaje obtenidos desde la API
                     $id = $character["id"];
                     $name = $character["name"];
                     $status = $character["status"];
                     $species = $character["species"];
                     $type = $character["type"];
                     $gender = $character["gender"];
-                    $origin = null;
+
+                    // Guardamos el nombre del lugar de origen
+                    $origin = $character["origin"]["name"] ?? null;
+
+                    // Obtenemos el ID de la ubicación actual desde su URL
                     $location_id = null;
-                    $episode = null;
-                    $image = $character["image"] ?? null; // <-- Asegurado al final
-                    
-                    // Validacion, existe en la bd?
-                    
-                    if ($cR->find($id)) {
 
-                        echo "El character ya existe en la base de datos";
-                        
-                    } else {
+                    if (!empty($character["location"]["url"])) {
+                        $location_id = (int) basename(
+                            $character["location"]["url"]
+                        );
+                    }
 
-                        try {
+                    // Guardamos temporalmente la lista de episodios
+                    $episode = $character["episode"] ?? [];
 
-                            // Respetando el orden del constructor: id, name, status, species, type, gender, origin, location_id, episode, image
-                            $cs = new Character($id, $name, $status, $species, $type, $gender, $origin, $location_id, $episode, $image);
-                            $cR->create($cs);
+                    // Imagen del personaje
+                    $image = $character["image"] ?? null;
 
-                            echo "Guardado exitosamente";
-                        } catch (Exception $ex) {
+                    try {
 
-                            echo $ex->getMessage();
+                        // Creamos el objeto Character con los datos obtenidos
+                        $cs = new Character(
+                            $id,
+                            $name,
+                            $status,
+                            $species,
+                            $type,
+                            $gender,
+                            $origin,
+                            $location_id,
+                            $episode,
+                            $image
+                        );
+
+                        // Si el personaje no existe lo inserta.
+                        // Si ya existe, actualiza sus datos.
+                        $cR->create($cs);
+
+                        // Recorremos los episodios en los que aparece
+                        foreach ($episode as $episodeUrl) {
+
+                            // Obtenemos solamente el ID desde la URL del episodio
+                            $episodeId = (int) basename($episodeUrl);
+
+                            // Guardamos la relación personaje-episodio
+                            if ($episodeId > 0) {
+                                $cR->addEpisode($id, $episodeId);
+                            }
                         }
+
+                        echo "Guardado/actualizado exitosamente";
+                    } catch (Exception $ex) {
+
+                        echo $ex->getMessage();
                     }
                 }
             }
 
+            // Cerramos la conexión CURL de la página actual
             curl_close($this->cUrl);
         }
     }
 
-    function traerCharacter(CharacterRepository $cR, int $id) {
+    function traerCharacter(CharacterRepository $cR, int $id)
+    {
 
         $char = new Character();
-        
+
         // Validacion, existe en la bd?
-        
+
         if ($cR->find($id)) {
 
             $arrayChar = $cR->find($id);
-            
+
             $char->setId($arrayChar["id"]);
             $char->setName($arrayChar["name"]);
             $char->setStatus($arrayChar["status"]);
@@ -113,11 +167,9 @@ class CharacterController extends ApiController {
             $char->setImage($arrayChar["image"]); // <-- ¡Agregado para que no falte la imagen!
 
             echo $char;
-            
-        }else{
-            
+        } else {
+
             echo "El personaje no esta en la base de datos";
-            
         }
     }
 }

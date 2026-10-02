@@ -12,13 +12,17 @@ require_once "repositories/BaseRepository.php";
 require_once "repositories/CharacterRepository.php";
 require_once "repositories/LocationRepository.php";
 
+// Creamos los controladores
 $cC = new CharacterController();
 $lC = new LocationController();
 $pC = new EpisodeController();
 
+// Creamos los repositorios
 $cR = new CharacterRepository();
+$lR = new LocationRepository();
 
 ?>
+
 <html>
 
 <head>
@@ -27,30 +31,36 @@ $cR = new CharacterRepository();
 
 <body>
 
-    Vamos a traer los personajes <br>
-
-    <?php
-
-    $info = $cC->info($cC->getCUrl());
-
-    $cC->bajarCharacters($cR);
-
-    $cC->traerCharacter($cR, 213);
-
-
-    ?>
-
     <br>Vamos a traer las localizaciones <br>
 
     <?php
-    $lR = new LocationRepository();
+
+    // Primero guardamos las localizaciones
+    // porque los personajes pueden tener una location_id asociada
     $lC->bajarLocations($lR);
+
     ?>
+
 
     <br>Vamos a traer los episodios <br>
 
     <?php
-    // $pC->bajarEpisodes();
+
+    // Después guardamos los episodios
+    // para poder relacionarlos luego con los personajes
+    $pC->bajarEpisodes();
+
+    ?>
+
+
+    <br>Vamos a traer los personajes <br>
+
+    <?php
+
+    // Por último guardamos o actualizamos los personajes
+    // y relacionamos cada personaje con sus episodios
+    $cC->bajarCharacters($cR);
+
     ?>
 
 </body>
