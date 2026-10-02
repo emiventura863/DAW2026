@@ -71,20 +71,38 @@ class CharacterRepository extends BaseRepository
         return $stmt->fetch();
     }
 
-    // Arma el pedazo "WHERE ..." + los parametros, compartido entre findAll y countAll
-    private function armarFiltro(?string $search, ?string $status): array
-    {
+    // Arma el WHERE y los parámetros para los filtros del listado
+    private function armarFiltro(
+        ?string $search,
+        ?string $status,
+        ?string $species,
+        ?string $gender
+    ): array {
         $condiciones = [];
         $parametros = [];
 
+        // Buscar por nombre
         if ($search !== null && $search !== "") {
-            $condiciones[] = "name LIKE :search";
+            $condiciones[] = "c.name LIKE :search";
             $parametros[":search"] = "%" . $search . "%";
         }
 
+        // Filtrar por estado
         if ($status !== null && $status !== "") {
-            $condiciones[] = "status = :status";
+            $condiciones[] = "c.status = :status";
             $parametros[":status"] = $status;
+        }
+
+        // Filtrar por especie
+        if ($species !== null && $species !== "") {
+            $condiciones[] = "c.species = :species";
+            $parametros[":species"] = $species;
+        }
+
+        // Filtrar por género
+        if ($gender !== null && $gender !== "") {
+            $condiciones[] = "c.gender = :gender";
+            $parametros[":gender"] = $gender;
         }
 
         $whereSql = count($condiciones) > 0
@@ -94,13 +112,29 @@ class CharacterRepository extends BaseRepository
         return [$whereSql, $parametros];
     }
 
-    public function findAll(int $page = 1, int $perPage = 20, ?string $search = null, ?string $status = null): array
-    {
-        [$whereSql, $parametros] = $this->armarFiltro($search, $status);
-
+    public function findAll(
+        int $page = 1,
+        int $perPage = 20,
+        ?string $search = null,
+        ?string $status = null,
+        ?string $species = null,
+        ?string $gender = null
+    ): array {
+        [$whereSql, $parametros] = $this->armarFiltro(
+            $search,
+            $status,
+            $species,
+            $gender
+        );
         $offset = ($page - 1) * $perPage;
 
-        $sql = "SELECT * FROM characters $whereSql ORDER BY id LIMIT :limit OFFSET :offset";
+        $sql = "SELECT
+            c.*,
+            l.name AS location_name
+        FROM characters c
+        LEFT JOIN locations l ON c.location_id = l.id
+        $whereSql
+        LIMIT :limit OFFSET :offset";
 
         $stmt = $this->pdo->prepare($sql);
 
@@ -118,15 +152,68 @@ class CharacterRepository extends BaseRepository
         return $stmt->fetchAll();
     }
 
-    public function countAll(?string $search = null, ?string $status = null): int
-    {
-        [$whereSql, $parametros] = $this->armarFiltro($search, $status);
+    public function countAll(
+        ?string $search = null,
+        ?string $status = null,
+        ?string $species = null,
+        ?string $gender = null
+    ): int {
+        [$whereSql, $parametros] = $this->armarFiltro(
+            $search,
+            $status,
+            $species,
+            $gender
+        );
 
-        $sql = "SELECT COUNT(*) FROM characters $whereSql";
+        $sql = "SELECT COUNT(*) FROM characters c $whereSql";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($parametros);
 
         return (int) $stmt->fetchColumn();
+    }
+
+    // Busca un personaje por su ID y obtiene también el nombre de su ubicación
+    public function findById(int $id): ?array
+    {
+        $sql = "SELECT
+                c.*,
+                l.name AS location_name
+            FROM characters c
+            LEFT JOIN locations l ON c.location_id = l.id
+            WHERE c.id = :id";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([
+            ':id' => $id
+        ]);
+
+        $personaje = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $personaje ?: null;
+    }
+
+    // Busca todos los episodios asociados a un personaje mediante la tabla intermedia
+    public function findEpisodesByCharacterId(int $characterId): array
+    {
+        $sql = "SELECT
+                e.id,
+                e.name,
+                e.air_date,
+                e.episode
+            FROM episodes e
+            INNER JOIN character_episode ce
+                ON e.id = ce.episode_id
+            WHERE ce.character_id = :character_id
+            ORDER BY e.id";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([
+            ':character_id' => $characterId
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

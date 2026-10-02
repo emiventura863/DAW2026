@@ -20,38 +20,39 @@ $cR = new CharacterRepository();
 
 ?>
 <html>
-    <head>
-        <title>Practica</title>
-    </head>
-    <body>
-        
-        Vamos a traer los personajes <br>
-        
-            <?php
-            
-            $info = $cC->info($cC->getCUrl());
-            
-            $cC->bajarCharacters($cR);
-            
-            $cC->traerCharacter($cR, 213);
-            
-            
-            ?>
-        
-        <br>Vamos a traer las localizaciones <br>
-            
-            <?php
-            $lR = new LocationRepository();
-            $lC->bajarLocations($lR);
-            ?>
-            
-        <br>Vamos a traer los episodios <br>
-        
-        <?php
-        // $pC->bajarEpisodes();
-        ?>
-        
-    </body>
+
+<head>
+    <title>Practica</title>
+</head>
+
+<body>
+
+    Vamos a traer los personajes <br>
+
+    <?php
+
+    $info = $cC->info($cC->getCUrl());
+
+    $cC->bajarCharacters($cR);
+
+    $cC->traerCharacter($cR, 213);
+
+
+    ?>
+
+    <br>Vamos a traer las localizaciones <br>
+
+    <?php
+    $lR = new LocationRepository();
+    $lC->bajarLocations($lR);
+    ?>
+
+    <br>Vamos a traer los episodios <br>
+
+    <?php
+    // $pC->bajarEpisodes();
+    ?>
+
+</body>
+
 </html>
-
-
